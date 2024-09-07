@@ -3,12 +3,12 @@ import type { Config } from '@docusaurus/types';
 import { themes as prismThemes } from 'prism-react-renderer';
 
 const config: Config = {
-  title: 'Dev Blog',
-  tagline: 'Blog sobre desenvolvimento de software',
+  title: 'Games Blog',
+  tagline: 'Blog sobre desenvolvimento de games',
   favicon: 'img/favicon.png',
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
+  url: 'https://games.rodrigohub.com',
 
   baseUrl: '/',
 
@@ -45,14 +45,13 @@ const config: Config = {
 
   themeConfig: {
     navbar: {
-      title: 'Dev Blog',
+      title: 'Games Blog',
       logo: {
-        alt: 'Dev Blog Logo',
+        alt: 'Games Blog Logo',
         src: 'img/favicon.png',
       },
       items: [
-        {to: '/blog', label: 'Blog', position: 'left'},
-        {to: '/showcase', label: 'Portifolio', position: 'left'},
+        { to: '/blog', label: 'Blog', position: 'left' },
         {
           href: 'https://github.com/Oosasukel/dev-hub',
           label: 'GitHub',
