@@ -1,0 +1,77 @@
+---
+slug: alternativa-integrar-cursor-com-unity
+title: 'Integrando Cursor com Unity'
+authors: [rodrigo]
+tags: [unity, cursor]
+date: 2025-02-21
+description: 'Integrando Cursor com Unity'
+---
+
+## Alternativa para integrar o Cursor com a Unity
+
+Como abrir scripts da Unity no Cursor
+
+{/* truncate */}
+
+## O Problema
+
+Ao definir o Cursor como editor externo na Unity, ao clicar em um script, o arquivo era aberto, mas não no contexto do projeto. Apenas o arquivo era carregado no Cursor, sem abrir a pasta do projeto.
+
+Para que o Cursor abra corretamente um arquivo no contexto do projeto, é necessário passar nos argumentos tanto o caminho do projeto quanto o caminho do arquivo. O problema é que a Unity não fornece uma variável para o caminho do projeto, apenas para o arquivo.
+
+## Solução
+
+Para resolver isso, criei um script PowerShell que recebe o caminho do arquivo como argumento, encontra a pasta do projeto e executa o Cursor com os argumentos corretos.
+
+## Criando o Script PowerShell
+
+Crie um arquivo `CursorUnityWrapper.ps1` e adicione o seguinte código:
+
+```powershell
+$encodedFilePath = $args -join " "
+$decodedPath = [System.Uri]::UnescapeDataString($encodedFilePath)
+
+$assetsIndex = $decodedPath.IndexOf("\Assets\")
+if ($assetsIndex -ge 0) {
+    $projectPath = $decodedPath.Substring(0, $assetsIndex)
+} else {
+    $projectPath = (Get-Location).Path
+}
+
+& "C:\Caminho\Para\Cursor.exe" "$projectPath" "$decodedPath"
+```
+
+> **Importante:** Substitua `C:\Caminho\Para\Cursor.exe` pelo caminho correto do Cursor no seu computador.
+
+Esse script:
+
+1. Recebe o caminho do arquivo passado pela Unity.
+2. Decodifica o caminho para evitar caracteres especiais.
+3. Encontra a pasta do projeto, assumindo que a pasta `Assets` está sempre dentro do diretório raiz do projeto Unity.
+4. Executa o Cursor passando tanto a pasta do projeto quanto o arquivo corretamente.
+
+Se o projeto tiver outra pasta chamada `Assets`, o script pode falhar, mas no geral funciona bem. Nesse caso de falha, poderiamos melhorar o script para ir descendo a hierarquia de pastas e procurando pela pasta `Packages`, por exemplo, ou algo do tipo.
+
+## Configurando na Unity
+
+Agora, configure a Unity para chamar esse script quando abrir um arquivo:
+
+1. Vá em **Edit > Preferences > External Tools**.
+2. No **External Script Editor**, escolha **Browse...** e procure o caminho do `powershell.exe`.
+3. No **Editor Args**, coloque:
+
+   ```powershell
+   -ExecutionPolicy Bypass -File "C:\Caminho\Para\CursorUnityWrapper.ps1" "$(File)"
+   ```
+
+> **Importante:** Substitua `C:\Caminho\Para\CursorUnityWrapper.ps1` pelo caminho correto do script no seu computador.
+
+A flag `-ExecutionPolicy Bypass` permite que o script seja executado sem restrições de segurança.
+
+import ImageUrl from './external-tools.png';
+
+<img src={ImageUrl} alt="Configuração do Cursor na Unity" />
+
+## Conclusão
+
+Agora, a Unity abrirá os arquivos no Cursor corretamente, carregando todo o projeto junto. Essa solução funciona no **Windows**, pois usa PowerShell. Se estiver em outro sistema operacional, será necessário adaptar para outro tipo de script.
